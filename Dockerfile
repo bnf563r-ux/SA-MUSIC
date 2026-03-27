@@ -8,12 +8,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 COPY requirements.txt .
-
 RUN pip install --upgrade pip
-RUN pip install yt-dlp python-dotenv
-RUN pip install "tgcalls==2.0.0"
-RUN pip install "pytgcalls==2.1.0"
-RUN pip install "pyrogram==2.0.106"
+RUN pip install -r requirements.txt
 
 COPY . .
 
