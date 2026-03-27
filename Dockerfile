@@ -1,29 +1,22 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
-# تثبيت FFmpeg و build tools و مكتبات tgcrypto
+# تثبيت ffmpeg وباقي الأدوات المطلوبة
 RUN apt-get update && apt-get install -y \
     ffmpeg \
-    build-essential \
-    libffi-dev \
-    libssl-dev \
     git \
     && rm -rf /var/lib/apt/lists/*
 
+# مجلد الشغل
 WORKDIR /app
-COPY . /app
 
-# تحديث pip
-RUN pip install --upgrade pip
+# نسخ ملف المتطلبات أول شي وتثبيتها
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# تثبيت Cython أولًا (tgcrypto يحتاجها)
-RUN pip install --no-cache-dir Cython
+# نسخ باقي الملفات
+COPY . .
 
-# تثبيت المكتبات الأساسية
-RUN pip install --no-cache-dir pyrogram tgcrypto yt-dlp
+# مجلد التحميلات
+RUN mkdir -p downloads
 
-# تثبيت pytgcalls و tgcalls مباشرة من GitHub
-RUN pip install --no-cache-dir git+https://github.com/pytgcalls/pytgcalls.git
-RUN pip install --no-cache-dir git+https://github.com/pytgcalls/tgcalls.git
-
-# تشغيل البوت
-CMD ["python", "bot.py"]
+CMD ["python", "music_bot.py"]
