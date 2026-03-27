@@ -17,10 +17,10 @@ RUN pip install --upgrade pip
 # تثبيت Cython أولًا (tgcrypto يحتاجها)
 RUN pip install --no-cache-dir Cython
 
-# تثبيت المكتبات الأساسية واحدة واحدة لتفادي تعارض dependencies
+# تثبيت المكتبات الأساسية بدون تحديد نسخة
 RUN pip install --no-cache-dir pyrogram
 RUN pip install --no-cache-dir tgcrypto
-RUN pip install --no-cache-dir pytgcalls==2.0.0
+RUN pip install --no-cache-dir pytgcalls
 RUN pip install --no-cache-dir yt-dlp
 
 # تشغيل البوت
