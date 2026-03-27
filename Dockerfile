@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     libffi-dev \
     libssl-dev \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -17,11 +18,12 @@ RUN pip install --upgrade pip
 # تثبيت Cython أولًا (tgcrypto يحتاجها)
 RUN pip install --no-cache-dir Cython
 
-# تثبيت المكتبات الأساسية بدون تحديد نسخة
-RUN pip install --no-cache-dir pyrogram
-RUN pip install --no-cache-dir tgcrypto
-RUN pip install --no-cache-dir pytgcalls
-RUN pip install --no-cache-dir yt-dlp
+# تثبيت المكتبات الأساسية
+RUN pip install --no-cache-dir pyrogram tgcrypto yt-dlp
+
+# تثبيت pytgcalls و tgcalls مباشرة من GitHub
+RUN pip install --no-cache-dir git+https://github.com/pytgcalls/pytgcalls.git
+RUN pip install --no-cache-dir git+https://github.com/pytgcalls/tgcalls.git
 
 # تشغيل البوت
 CMD ["python", "bot.py"]
