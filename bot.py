@@ -1,44 +1,48 @@
 import os
 from pyrogram import Client, filters
+from pyrogram.types import Message
 from pytgcalls import PyTgCalls
-from pytgcalls.types import AudioPiped
+from pytgcalls.types.input_stream import AudioStream
 from yt_dlp import YoutubeDL
 
-# إعدادات من .env
+# إعدادات البوت
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+SESSION = os.getenv("SESSION")  # سشن الـPyrogram
+GROUP_ID = int(os.getenv("GROUP_ID"))  # آي دي الجروب
 
-# إنشاء بوت وPyTgCalls
-app = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+app = Client(SESSION, api_id=API_ID, api_hash=API_HASH)
 pytgcalls = PyTgCalls(app)
 
-# أمر تشغيل أغنية يوتيوب
-@app.on_message(filters.command("شغل") & filters.group)
-async def play_song(client, message):
-    if len(message.command) < 2:
-        await message.reply_text("هات رابط اليوتيوب أو اسم الأغنية 😎")
+ydl_opts = {
+    "format": "bestaudio/best",
+    "quiet": True,
+    "noplaylist": True
+}
+
+@app.on_message(filters.command("شغل") & filters.chat(GROUP_ID))
+async def play_song(client: Client, message: Message):
+    try:
+        text = message.text.split(" ", 1)[1]  # ناخذ اسم الأغنية
+    except IndexError:
+        await message.reply("گوللي شنو تريد تشغل 😅")
         return
 
-    query = " ".join(message.command[1:])
-    
-    # تحميل أفضل نتيجة من يوتيوب
-    ydl_opts = {"format": "bestaudio/best", "noplaylist": True, "quiet": True}
+    # نبحث على يوتيوب
     with YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
+        info = ydl.extract_info(f"ytsearch:{text}", download=False)['entries'][0]
         url = info['url']
 
-    chat_id = message.chat.id
+    await message.reply(f"آهلا بيك 😎، رح أشغل: {info['title']}")
+    
+    # تشغیل الصوت
+    pytgcalls.join_group_call(
+        GROUP_ID,
+        AudioStream(url)
+    )
 
-    # تشغيل الأغنية
-    try:
-        await pytgcalls.join_group_call(chat_id, AudioPiped(url))
-        await message.reply_text(f"شغلتلك الأغنية 🎵: {info['title']}")
-    except Exception as e:
-        await message.reply_text(f"صارت مشكلة 😅: {e}")
-
-# تشغيل البوت
-app.start()
-pytgcalls.start()
-print("البوت شغال 24/7 🚀")
-app.idle()
+if __name__ == "__main__":
+    app.start()
+    pytgcalls.start()
+    print("البوت شغّال 😎")
+    app.idle()
